@@ -1,14 +1,16 @@
 #ifndef __GA_H__
 #define __GA_H__
 
+#include <vector>
 #include "WindScenario.h"
 #include "KusiakLayoutEvaluator.h"
 #include "Matrix.hpp"
+#include "Chromosome.h"
 
 class GA {
   public:
     KusiakLayoutEvaluator wfle;
-    Matrix<int>* pops;
+    vector<Chromosome> pops;
     int num_pop;
     double* fits;
     int nt;
@@ -23,6 +25,7 @@ class GA {
 
   private:
     void evaluate();
+    double evaluate_single(Chromosome soln);
 };
 
 #endif

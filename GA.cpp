@@ -6,10 +6,13 @@
 #include <stdlib.h>
 #include <cstdlib>
 #include <time.h>
+#include <vector>
+#include <algorithm>
 
 #include "GA.h"
 #include "WindScenario.h"
 #include "KusiakLayoutEvaluator.h"
+#include "Chromosome.h"
 
 GA::GA(KusiakLayoutEvaluator evaluator) {
   
@@ -27,8 +30,31 @@ GA::GA(KusiakLayoutEvaluator evaluator) {
 
 GA::~GA() {
   delete[] fits;
-  delete pops;
   delete grid;
+}
+
+double GA::evaluate_single(Chromosome soln) {
+  int nturbines=0;
+  for (int i=0; i<nt; i++) {
+    if (soln.turbines[i]>0) {
+      nturbines++;
+    }
+  }
+
+  Matrix<double>* layout = new Matrix<double>(nturbines,2);
+  int l_i = 0;
+  for (int i=0; i<nt; i++) {
+    if (soln.turbines[i]>0) {
+      layout->set(l_i, 0, grid->get(i,0));
+      layout->set(l_i, 1, grid->get(i,1));
+      l_i++;
+    }
+  }
+
+  wfle.evaluate(layout);
+  double coe = wfle.getEnergyCost();
+  delete layout;
+  return coe;
 }
 
 void GA::evaluate() {
@@ -36,7 +62,7 @@ void GA::evaluate() {
   for (int p=0; p<num_pop; p++) {
     int nturbines=0;
     for (int i=0; i<nt; i++) {
-      if (pops->get(i,p)>0) {
+      if (pops[p].turbines[i]>0) {
         nturbines++;
       }
     }
@@ -44,7 +70,7 @@ void GA::evaluate() {
     Matrix<double>* layout = new Matrix<double>(nturbines,2);
     int l_i = 0;
     for (int i=0; i<nt; i++) {
-      if (pops->get(i,p)>0) {
+      if (pops[p].turbines[i]>0) {
         layout->set(l_i, 0, grid->get(i,0));
         layout->set(l_i, 1, grid->get(i,1));
         l_i++;
@@ -133,24 +159,22 @@ void GA::run() {
   }
 
   // initialize populations
-  pops = new Matrix<int>(nt, num_pop);
+  pops = vector<Chromosome>(num_pop, Chromosome(nt));
 
-  for (int p=0; p<num_pop; p++) {
-    for (int i=0; i<nt; i++) {
-      int turb = 0;
-      double randbit = (double) rand()/RAND_MAX;
-      if (randbit > 0.5) {
-        turb = 1;
+  for (int chromosome = 0; chromosome < num_pop; chromosome++) {
+    for (int turbine = 0; turbine < pops[chromosome].num_turbines; turbine++){
+      if ((double)rand()/RAND_MAX > 0.5){
+        pops[chromosome].turbines[turbine] = 1;
+      } else {
+        pops[chromosome].turbines[turbine] = 0;
       }
-      pops->set(i, p, turb);
     }
+    pops[chromosome].fitness = evaluate_single(pops[chromosome]);
   }
 
   // evaluate initial populations (uses num_pop evals)
-  evaluate();
-
-  // put your optimisation code here
-  for (int i=0; i<(10000); i++) {
-     
+  std::sort(pops.begin(), pops.end());
+  for (int i = 0; i < pops.size(); i++){
+    printf("%2d: %f\n", i, pops[i].fitness);
   }
 }
