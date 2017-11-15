@@ -1,5 +1,5 @@
 CC=clang++
-CFLAGS =-Wall -std=c++0x -g
+CFLAGS =-Wall -std=c++0x -g -DNUM_EVALUATIONS=100
 OPTFLAGS=
 INCLUDES=-I$(PWD)
 

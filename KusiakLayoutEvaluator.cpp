@@ -1,4 +1,5 @@
 #include "KusiakLayoutEvaluator.h"
+#include <stdexcept>
 
 KusiakLayoutEvaluator::KusiakLayoutEvaluator() {
   tspe=NULL;
@@ -40,7 +41,11 @@ double KusiakLayoutEvaluator::evaluate(Matrix<double>* layout) {
 }
 
 double KusiakLayoutEvaluator::evaluate_2014(Matrix<double>* layout) {
-  nEvals++;
+  if (nEvals >= NUM_EVALUATIONS){
+    throw std::out_of_range("Ran out of evaluations");
+  } else {
+    nEvals++;
+  }
   if (tpositions) delete tpositions;
   tpositions=new Matrix<double>(layout);
   if (tspe) delete tspe;

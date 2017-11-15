@@ -8,6 +8,7 @@
 #include <time.h>
 #include <vector>
 #include <algorithm>
+#include <stdexcept>
 
 #include "GA.h"
 #include "WindScenario.h"
@@ -173,8 +174,19 @@ void GA::run() {
   }
 
   // evaluate initial populations (uses num_pop evals)
+  puts("Initial population:");
   std::sort(pops.begin(), pops.end());
   for (int i = 0; i < pops.size(); i++){
     printf("%2d: %f\n", i, pops[i].fitness);
+  }
+  printf("Lowest cost: %f\n", pops[0].fitness);
+
+  try {
+    while (true){
+      evaluate_single(pops[0]);
+    }
+  } catch (const std::out_of_range& e) {
+    std::sort(pops.begin(), pops.end());
+    printf("Ran out of evaluations. Lowest cost: %f\n", pops[0].fitness);
   }
 }
