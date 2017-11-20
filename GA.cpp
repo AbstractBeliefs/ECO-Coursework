@@ -237,9 +237,9 @@ Chromosome GA::crossover(Chromosome a, Chromosome b){
 
   for (int turbine = 0; turbine < child.num_turbines; turbine++){
     if (turbine < crossover_point){
-      child.turbines.push_back(a.turbines[turbine]);
+      child.turbines[turbine] = a.turbines[turbine];
     } else {
-      child.turbines.push_back(b.turbines[turbine]);
+      child.turbines[turbine] = b.turbines[turbine];
     }
   }
 
