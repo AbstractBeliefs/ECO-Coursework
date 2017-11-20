@@ -24,7 +24,7 @@ GA::GA(KusiakLayoutEvaluator evaluator) {
   num_pop = 20;
   nt = 0;
   tour_size = 4;
-  mut_rate = 0.05;
+  mut_rate = 0.25;
   cross_rate = 0.40;
   srand(time(NULL));
 }
@@ -179,14 +179,79 @@ void GA::run() {
   for (int i = 0; i < pops.size(); i++){
     printf("%2d: %f\n", i, pops[i].fitness);
   }
-  printf("Lowest cost: %f\n", pops[0].fitness);
+  double initial_lowest_cost = pops[0].fitness;
+  printf("Lowest cost: %f\n", initial_lowest_cost);
 
   try {
+    int eval_counter = 0;
+    puts("Burning evaluations...");
     while (true){
-      evaluate_single(pops[0]);
+      if (eval_counter % 100 == 0){
+        float top = pops[0].fitness;
+        float bottom = pops[num_pop-1].fitness;
+        float delta = initial_lowest_cost - top;
+        printf("Evaluation %5d. Current top: %f, bottom: %f, current delta: %f\n", eval_counter, top, bottom, delta);
+      }
+      Chromosome child = mutate(crossover(tournament_selection(tour_size), tournament_selection(tour_size)));
+      child.fitness = evaluate_single(child);
+      pops.push_back(child);
+      std::sort(pops.begin(), pops.end());
+      pops.pop_back();
+      eval_counter++;
     }
   } catch (const std::out_of_range& e) {
     std::sort(pops.begin(), pops.end());
-    printf("Ran out of evaluations. Lowest cost: %f\n", pops[0].fitness);
+    printf("Ran out of evaluations.\n");
+    printf("Initial Lowest cost: %f\n", initial_lowest_cost);
+    printf("Current Lowest cost: %f\n", pops[0].fitness);
+    printf("delta cost: %f\n", initial_lowest_cost - pops[0].fitness);
   }
+}
+
+Chromosome GA::population_pick_one(){
+  return pops[rand() % pops.size()];
+}
+
+Chromosome GA::tournament_selection(int tournament_size){
+  vector<Chromosome> tournament;
+
+  for (int i = 0; i < tournament_size; i++){
+    Chromosome selection = population_pick_one();
+    while (true){
+      if (std::find(tournament.begin(), tournament.end(), selection) != tournament.end()) {
+        selection = population_pick_one();
+      } else {
+        tournament.push_back(selection);
+        break;
+      }
+    }
+  }
+
+  std::sort(tournament.begin(), tournament.end());
+  return tournament[0];
+}
+
+Chromosome GA::crossover(Chromosome a, Chromosome b){
+  Chromosome child = Chromosome(a.num_turbines);
+  int crossover_point = rand()%child.num_turbines;
+
+  for (int turbine = 0; turbine < child.num_turbines; turbine++){
+    if (turbine < crossover_point){
+      child.turbines.push_back(a.turbines[turbine]);
+    } else {
+      child.turbines.push_back(b.turbines[turbine]);
+    }
+  }
+
+  return child;
+}
+
+Chromosome GA::mutate(Chromosome c){
+  for (int turbine = 0; turbine < c.num_turbines; turbine++){
+    if ((double)rand()/RAND_MAX > this->mut_rate){
+      c.turbines[turbine] = c.turbines[turbine] ? 0 : 1;
+    }
+  }
+
+  return c;
 }

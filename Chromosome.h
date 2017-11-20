@@ -13,5 +13,6 @@ public:
   ~Chromosome();
 
   bool operator<(const Chromosome &b) const;
+  bool operator==(const Chromosome &b) const;
 };
 #endif

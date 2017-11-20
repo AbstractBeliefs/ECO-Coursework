@@ -1,6 +1,6 @@
 CC=clang++
-CFLAGS =-Wall -std=c++0x -g -DNUM_EVALUATIONS=100
-OPTFLAGS=
+CFLAGS =-Wall -std=c++0x -g -DNUM_EVALUATIONS=10000
+OPTFLAGS=-O2
 INCLUDES=-I$(PWD)
 
 SOURCES=tinyxml2.cpp WindScenario.cpp WindFarmLayoutEvaluator.cpp KusiakLayoutEvaluator.cpp GA.cpp Chromosome.cpp

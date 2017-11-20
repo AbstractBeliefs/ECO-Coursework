@@ -26,6 +26,10 @@ class GA {
   private:
     void evaluate();
     double evaluate_single(Chromosome soln);
+    Chromosome population_pick_one();
+    Chromosome tournament_selection(int tournament_size);
+    Chromosome crossover(Chromosome a, Chromosome b);
+    Chromosome mutate(Chromosome c);
 };
 
 #endif

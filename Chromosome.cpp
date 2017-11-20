@@ -19,3 +19,7 @@ bool Chromosome::operator<(const Chromosome &b) const {
     return false;
   }
 }
+
+bool Chromosome::operator==(const Chromosome &b) const {
+  return this->turbines == b.turbines;
+}
